@@ -327,7 +327,7 @@ const updateRowInDatabase = async (updatedRowData) => {
         },
       }
     );
-
+//durga
     // Check the response status
     if (response.status === 200) {
       console.log('Row updated:', response.data);
