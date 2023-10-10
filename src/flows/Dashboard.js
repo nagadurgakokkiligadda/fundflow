@@ -18,6 +18,13 @@ import { useNavigate,useParams } from 'react-router-dom';
 import P2ploans from './P2ploans';
 import axios from 'axios';
 import jwtDecode from "jwt-decode";
+import RO2RO from './RO2RO';
+import P2R from './P2R';
+import Payments from './Payments';
+import R2C from './R2C';
+import ReceiptRO from './ReceiptRO';
+import Termloan from './Termloan';
+import Reserves from './Reserves';
 const drawerWidth = 240;
 
 const AppBar = styled(MuiAppBar, {
@@ -216,6 +223,41 @@ function Dashboard() {
           )}
           {selectedItem && selectedItem.primaryText === 'P2P Loans' ? (
             <P2ploans firstName={firstName} lastName={lastName}/>
+          ) : (
+            <div></div>
+          )}
+           {selectedItem && selectedItem.primaryText === 'RO To RO Loans' ? (
+            <RO2RO/>
+          ) : (
+            <div></div>
+          )}
+          {selectedItem && selectedItem.primaryText === 'P2R Surplus Funds Transfer' ? (
+            <P2R/>
+          ) : (
+            <div></div>
+          )}
+           {selectedItem && selectedItem.primaryText === 'Payments' ? (
+            <Payments/>
+          ) : (
+            <div></div>
+          )}
+          {selectedItem && selectedItem.primaryText === 'R2C Surplus Funds Transfer' ? (
+            <R2C/>
+          ) : (
+            <div></div>
+          )}
+          {selectedItem && selectedItem.primaryText === 'Receipt From RO' ? (
+            <ReceiptRO/>
+          ) : (
+            <div></div>
+          )}
+          {selectedItem && selectedItem.primaryText === 'Term Loan Set Off' ? (
+            <Termloan/>
+          ) : (
+            <div></div>
+          )}
+            {selectedItem && selectedItem.primaryText === 'Reserves' ? (
+            <Reserves/>
           ) : (
             <div></div>
           )}

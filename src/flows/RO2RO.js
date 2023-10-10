@@ -70,7 +70,7 @@ const NewTableCell = styled(TableCell)(({ theme }) => ({
   fontFamily: 'sans-serif',
 }));
 
-function P2ploans({firstName,lastName}) {
+function RO2RO({firstName,lastName}) {
 
 console.log('naga',firstName);
 console.log('durga',lastName);
@@ -131,7 +131,7 @@ console.log('durga',lastName);
           Authorization: `Bearer ${accessToken}`,
         },
       };
-      const response = await axios.get('https://api.p360.build:6060/v1/fundflow/p2p-loans/fetchAll', Cookie);
+      const response = await axios.get('https://api.p360.build:6060/v1/fundflow/ro2roloans/fetchAll', Cookie);
       const data = response.data.data;
       setData(data);
     } catch (error) {
@@ -154,7 +154,7 @@ console.log('durga',lastName);
       const CreatedBy = firstName&&lastName?`${firstName} ${lastName}`:""
       const SubmittedBy = firstName&&lastName?`${firstName} ${lastName}`:""
       const response = await axios.post(
-        'https://api.p360.build:6060/v1/fundflow/p2p-loans/draft',
+        'https://api.p360.build:6060/v1/fundflow/ro2roloans/draft',
           {
             transactionType:newRowData.transactionType,
             documentDate: newRowData.documentDate ,
@@ -305,7 +305,7 @@ const updateRowInDatabase = async (updatedRowData) => {
     }
 
     const response = await axios.put(
-      `https://api.p360.build:6060/v1/fundflow/p2p-loans/submit`, 
+      `https://api.p360.build:6060/v1/fundflow/ro2roloans/submit`, 
       {
         transactionType: updatedRowData.transactionType,
         documentDate: updatedRowData.documentDate,
@@ -595,4 +595,4 @@ const renderSubmittedByCell = (row) => {
   );
 }
 
-export default P2ploans;
+export default RO2RO;

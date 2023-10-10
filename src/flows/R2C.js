@@ -23,6 +23,12 @@ import EditIcon from '@mui/icons-material/EditOutlined';
 import FileCopyIcon from '@mui/icons-material/FileCopyOutlined';
 import TablePagination from '@mui/material/TablePagination';
 
+
+// Colevies.js
+import { getUserInfo } from './auth'; // Adjust the path to the actual location of auth.js or userService.js
+
+// import { format } from 'date-fns';
+
 const inputStyle = {
   textDecoration: 'none',
 };
@@ -70,10 +76,7 @@ const NewTableCell = styled(TableCell)(({ theme }) => ({
   fontFamily: 'sans-serif',
 }));
 
-function P2ploans({firstName,lastName}) {
-
-console.log('naga',firstName);
-console.log('durga',lastName);
+function R2C() {
   const ttypOptions = ['BLR', 'CO', 'HYD', 'RAN'];
   const statusOptions = ['Draft', 'Submitted'];
   const ledgerOptions = [
@@ -87,9 +90,9 @@ console.log('durga',lastName);
     year: '',
     period: '',
     reference: '',
-    loanIssuedProject: '',
+    paymentProject: '',
 
-    loanReceivedProject: '',
+    receiptProject: '',
     ledger: '',
     amount: '',
     status: '',
@@ -131,7 +134,7 @@ console.log('durga',lastName);
           Authorization: `Bearer ${accessToken}`,
         },
       };
-      const response = await axios.get('https://api.p360.build:6060/v1/fundflow/p2p-loans/fetchAll', Cookie);
+      const response = await axios.get('https://api.p360.build:6060/v1/fundflow/r2cSurplusFundsTransfer/fetchAll', Cookie);
       const data = response.data.data;
       setData(data);
     } catch (error) {
@@ -151,25 +154,24 @@ console.log('durga',lastName);
         console.error('Access token is missing. Please ensure the user is authenticated.');
         return;
       }
-      const CreatedBy = firstName&&lastName?`${firstName} ${lastName}`:""
-      const SubmittedBy = firstName&&lastName?`${firstName} ${lastName}`:""
+
       const response = await axios.post(
-        'https://api.p360.build:6060/v1/fundflow/p2p-loans/draft',
+        'https://api.p360.build:6060/v1/fundflow/r2cSurplusFundsTransfer/draft',
           {
             transactionType:newRowData.transactionType,
             documentDate: newRowData.documentDate ,
             year:  newRowData.year,
             period: newRowData.period ,
             reference: newRowData.reference,
-            loanIssuedProject:newRowData.loanIssuedProject ,
-            loanReceivedProject: newRowData.loanReceivedProject,
+            paymentProject:newRowData.paymentProject ,
+            receiptProject: newRowData.receiptProject,
             ledger:newRowData.ledger ,
             amount:newRowData.amount ,
             status:newRowData.status ,
             createdDate:newRowData.createdDate ,
-            createdBy: CreatedBy,
+            createdBy: newRowData.createdBy,
             submittedOn:newRowData.submittedOn,
-            submittedBy:SubmittedBy
+            submittedBy:newRowData.submittedBy
         
         },
         
@@ -187,31 +189,52 @@ console.log('durga',lastName);
       );
       console.log('New row data saved:', response.data);
 
-   
     if (response.status === 200) {
       console.log('New row data saved:', response.data);
-    
+     
     } else {
       console.error('Error saving new row. Unexpected response status:', response.status);
     
     }
   } catch (error) {
-    console.error('Error saving new row:', error);
-   
-  }
+    console.error('Error saving new row:', error);  }
 };
 
+// const handleAddClick = () => {
+//   setIsAddingRow(true);
+//   const currentDatetime = getCurrentDatetime();
+//   const submittedDatetime = getCurrentDatetime(); // Set a different value for submittedOn
+//   setFormData({
+//     ...initialFormData,
+//     createdDate: currentDatetime,
+//     submittedOn: submittedDatetime,
+//     // createdBy: 'System User', // Replace with the desired system-generated value for createdBy
+//     // submittedBy: 'System User', // Replace with the desired system-generated value for submittedBy
+//   });
+// };
 const handleAddClick = () => {
-    setIsAddingRow(true);
-    const currentDatetime = getCurrentDatetime();
-    const submittedDatetime = getCurrentDatetime();
+  setIsAddingRow(true);
+  const currentDatetime = getCurrentDatetime();
+  const submittedDatetime = getCurrentDatetime(); // Set a different value for submittedOn
+
+  const user = getUserInfo();
+
+  if (user) {
     setFormData({
       ...initialFormData,
       createdDate: currentDatetime,
       submittedOn: submittedDatetime,
-     
+      createdBy: user.username, 
+      submittedBy: user.username, 
     });
+  } else {
+    
+    console.error('User information not available.');
   }
+};
+
+
+
 
   const handleCancelClick = () => {
     setIsAddingRow(false);
@@ -229,11 +252,11 @@ const handleAddClick = () => {
     setEditingRowIndex(null);
     setFormData(initialFormData);
     updateRowInDatabase(formData);
- 
+   
     // saveNewRowToDatabase(formData);
   } else {
     
-    const currentDatetime = getCurrentDatetime(); 
+    const currentDatetime = getCurrentDatetime();
     const updatedFormData = { ...formData, submittedOn: currentDatetime }; 
     setData([updatedFormData, ...data]);
     setIsAddingRow(false);
@@ -267,34 +290,43 @@ const handleEditClick = (index) => {
   };
 
   const handleInputChange = (field) => (event) => {
-  const value = event.target.value;
-  if (field === 'documentDate') {
-    const formattedDate = value.split('T')[0]; 
-    setFormData({ ...formData, [field]: formattedDate });
-  }  else if (field === ' createdDate' || field === 'submittedOn') {
- const formattedDatetime = `${value} 00:00:00`; 
-setFormData({ ...formData, [field]: formattedDatetime });
+    const value = event.target.value;
+    if (field === 'documentDate') {
+    
+      const dateObj = new Date(value);
+      
+   
+      if (!isNaN(dateObj.getTime())) {
+     
+        const formattedDate = `${String(dateObj.getDate()).padStart(2, '0')}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${dateObj.getFullYear()}`;
+        
+        setFormData({ ...formData, [field]: formattedDate });
+      } else {
 
-}
- else if (field === 'reference') {
-    if (value.length <= 30) {
+        console.error('Invalid date input');
+      }
+    } else if (field === 'createdDate' || field === 'submittedOn') {
+      const formattedDatetime = `${value} 00:00:00`;
+      setFormData({ ...formData, [field]: formattedDatetime });
+    } else if (field === 'reference') {
+      if (value.length <= 30) {
+        setFormData({ ...formData, [field]: value });
+      }
+    } else if (field === 'paymentProject' || field === 'receiptProject') {
+      if (value.length === 9) {
+        setFormData({ ...formData, [field]: value });
+      } else if (value.length < 9) {
+        setFormData({ ...formData, [field]: value });
+      }
+    } else if (field === 'amount') {
+      if (!isNaN(value)) {
+        setFormData({ ...formData, [field]: value });
+      }
+    } else {
       setFormData({ ...formData, [field]: value });
     }
-  } else if (field === 'paymentProject' || field === 'loanReceivedProject') {
-    if (value.length === 9) {
-      setFormData({ ...formData, [field]: value });
-    } else if (value.length < 9) {
-      setFormData({ ...formData, [field]: value });
-    }
-  } else if (field === 'amount') {
-    if (!isNaN(value)) {
-      setFormData({ ...formData, [field]: value });
-    }
-  } else {
-    setFormData({ ...formData, [field]: value });
-  }
-};
-
+  };
+  
 
 const updateRowInDatabase = async (updatedRowData) => {
   try {
@@ -305,15 +337,15 @@ const updateRowInDatabase = async (updatedRowData) => {
     }
 
     const response = await axios.put(
-      `https://api.p360.build:6060/v1/fundflow/p2p-loans/submit`, 
+      `https://api.p360.build:6060/v1/fundflow/r2cSurplusFundsTransfer/submit`, 
       {
         transactionType: updatedRowData.transactionType,
         documentDate: updatedRowData.documentDate,
         year: updatedRowData.year,
         period: updatedRowData.period,
         reference: updatedRowData.reference,
-        loanIssuedProject : updatedRowData.loanIssuedProject,
-        loanReceivedProject: updatedRowData.loanReceivedProject,
+        paymentProject: updatedRowData.paymentProject,
+        receiptProject: updatedRowData.receiptProject,
         ledger: updatedRowData.ledger,
         amount: updatedRowData.amount,
         status: updatedRowData.status,
@@ -330,28 +362,18 @@ const updateRowInDatabase = async (updatedRowData) => {
       }
     );
 
-
     if (response.status === 200) {
       console.log('Row updated:', response.data);
-  
+    
     } else {
       console.error('Error updating row. Unexpected response status:', response.status);
-     
+
     }
   } catch (error) {
     console.error('Error updating row:', error);
   
   }
 };
-
-const renderSubmittedByCell = (row) => {
-  if (row.status === 'Submitted') {
-    return <NewTableCell>{row.submittedBy}</NewTableCell>;
-  } else {
-    return <NewTableCell>{row.createdBy}</NewTableCell>; // Render an empty cell for other statuses
-  }
-};
-
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
@@ -374,8 +396,8 @@ const renderSubmittedByCell = (row) => {
               <StyledTableCell>Year</StyledTableCell>
               <StyledTableCell>Period</StyledTableCell>
               <StyledTableCell>Reference</StyledTableCell>
-              <StyledTableCell>Loan Issued Project Project</StyledTableCell>
-              <StyledTableCell>Loan Received Project</StyledTableCell>
+              <StyledTableCell>Payment Project</StyledTableCell>
+              <StyledTableCell>Receipt Project</StyledTableCell>
               <StyledTableCell>Ledger</StyledTableCell>
               <StyledTableCell>Amount</StyledTableCell>
               <StyledTableCell>Status</StyledTableCell>
@@ -398,10 +420,10 @@ const renderSubmittedByCell = (row) => {
                     ))}
                   </Select>
                 </TableCell>
-               
+               <TableCell>
                 <TextField
     variant="standard"
-    type="datetime-local"
+    type="datetime-local" 
     value={formData.documentDate}
     onChange={handleInputChange('documentDate')}
     style={inputStyle}
@@ -409,6 +431,7 @@ const renderSubmittedByCell = (row) => {
       shrink: true,
     }}
   />
+  </TableCell>
                 <TableCell>
                   <Input
                     id="year-input"
@@ -441,8 +464,8 @@ const renderSubmittedByCell = (row) => {
                     id="payment-project-input"
                     autoComplete="off"
                     style={{ width: '200px' }}
-                    value={formData.loanIssuedProject}
-                    onChange={handleInputChange('loanIssuedProject')}
+                    value={formData.paymentProject}
+                    onChange={handleInputChange('paymentProject')}
                   />
                 </TableCell>
                 <TableCell>
@@ -450,8 +473,8 @@ const renderSubmittedByCell = (row) => {
                     id="receipt-project-input"
                     autoComplete="off"
                     style={{ width: '200px' }}
-                    value={formData.loanReceivedProject}
-                    onChange={handleInputChange('loanReceivedProject')}
+                    value={formData.receiptProject}
+                    onChange={handleInputChange('receiptProject')}
                   />
                 </TableCell>
                 <TableCell>
@@ -544,8 +567,8 @@ const renderSubmittedByCell = (row) => {
                 <NewTableCell>{row.year}</NewTableCell>
                 <NewTableCell>{row.period}</NewTableCell>
                 <NewTableCell>{row.reference}</NewTableCell>
-                <NewTableCell>{row.loanIssuedProject}</NewTableCell>
-                <NewTableCell>{row.loanReceivedProject}</NewTableCell>
+                <NewTableCell>{row.paymentProject}</NewTableCell>
+                <NewTableCell>{row.receiptProject}</NewTableCell>
                 <NewTableCell>{row.ledger}</NewTableCell>
                 <NewTableCell>{row.amount}</NewTableCell>
                 <NewTableCell
@@ -595,4 +618,4 @@ const renderSubmittedByCell = (row) => {
   );
 }
 
-export default P2ploans;
+export default R2C;

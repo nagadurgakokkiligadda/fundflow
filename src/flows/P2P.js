@@ -189,7 +189,6 @@ function P2P() {
       );
       console.log('New row data saved:', response.data);
 
-    // Check the response status
     if (response.status === 200) {
       console.log('New row data saved:', response.data);
      
@@ -225,11 +224,11 @@ const handleAddClick = () => {
       ...initialFormData,
       createdDate: currentDatetime,
       submittedOn: submittedDatetime,
-      createdBy: user.username, // Use the username or display name from the user object
-      submittedBy: user.username, // Use the username or display name from the user object
+      createdBy: user.username, 
+      submittedBy: user.username, 
     });
   } else {
-    // Handle the case where user information is not available
+    
     console.error('User information not available.');
   }
 };
@@ -253,12 +252,12 @@ const handleAddClick = () => {
     setEditingRowIndex(null);
     setFormData(initialFormData);
     updateRowInDatabase(formData);
-    // Call the saveNewRowToDatabase function here for editing
+   
     // saveNewRowToDatabase(formData);
   } else {
-    // Set the submittedOn field to the current datetime when adding a new row
-    const currentDatetime = getCurrentDatetime(); // Get the current datetime
-    const updatedFormData = { ...formData, submittedOn: currentDatetime }; // Set "submittedOn" to the current datetime
+    
+    const currentDatetime = getCurrentDatetime();
+    const updatedFormData = { ...formData, submittedOn: currentDatetime }; 
     setData([updatedFormData, ...data]);
     setIsAddingRow(false);
     setFormData(initialFormData);
@@ -293,17 +292,17 @@ const handleEditClick = (index) => {
   const handleInputChange = (field) => (event) => {
     const value = event.target.value;
     if (field === 'documentDate') {
-      // Parse the input as a date object
+    
       const dateObj = new Date(value);
       
-      // Check if the parsed date is valid
+   
       if (!isNaN(dateObj.getTime())) {
-        // Format the date as dd-mm-yyyy
+     
         const formattedDate = `${String(dateObj.getDate()).padStart(2, '0')}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${dateObj.getFullYear()}`;
         
         setFormData({ ...formData, [field]: formattedDate });
       } else {
-        // Invalid date, you can handle this case or show an error message
+
         console.error('Invalid date input');
       }
     } else if (field === 'createdDate' || field === 'submittedOn') {
@@ -338,7 +337,7 @@ const updateRowInDatabase = async (updatedRowData) => {
     }
 
     const response = await axios.put(
-      `https://api.p360.build:6060/v1/fundflow/p2p-payments/submit`, // Update the API endpoint with the row's unique identifier (id)
+      `https://api.p360.build:6060/v1/fundflow/p2p-payments/submit`, 
       {
         transactionType: updatedRowData.transactionType,
         documentDate: updatedRowData.documentDate,
@@ -363,17 +362,16 @@ const updateRowInDatabase = async (updatedRowData) => {
       }
     );
 
-    // Check the response status
     if (response.status === 200) {
       console.log('Row updated:', response.data);
-      // Perform any necessary actions after successful update
+    
     } else {
       console.error('Error updating row. Unexpected response status:', response.status);
-      // Handle the error accordingly
+
     }
   } catch (error) {
     console.error('Error updating row:', error);
-    // Handle the error, log it, or show an error message to the user
+  
   }
 };
   return (
@@ -425,7 +423,7 @@ const updateRowInDatabase = async (updatedRowData) => {
                <TableCell>
                 <TextField
     variant="standard"
-    type="datetime-local" // Updated to datetime-local
+    type="datetime-local" 
     value={formData.documentDate}
     onChange={handleInputChange('documentDate')}
     style={inputStyle}
